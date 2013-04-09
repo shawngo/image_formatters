@@ -1,0 +1,144 @@
+<?php
+
+/**
+ * @file
+ * Custom functions for this site.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function image_formatters_menu() {
+  $items = array();
+  $items['admin/settings/image-formatters'] = array(
+    'title' => 'Image formatters',
+    'description' => 'Image formatters settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('image_formatters_admin_settings_form'),
+    'file' => 'image_formatters.admin.inc',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+* Implementation of CCK's hook_field_formatter_info().
+*/
+function image_formatters_field_formatter_info() {
+  $formatters = array(
+    'main_thumbs' => array(
+      'label' => t('Main + Thumbnails'),
+      'field types' => array('filefield'),
+      'description' => t('Displays main image and thumbnails.'),
+    ),
+    'single_image' => array(
+      'label' => t('Single image'),
+      'field types' => array('filefield'),
+      'description' => t('Displays a single image - good for search displays.'),
+    ),
+  );
+  return $formatters;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function image_formatters_theme() {
+  return array(
+    'image_formatters_formatter_main_thumbs' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'image_formatters_formatter_single_image' => array(
+      'arguments' => array('element' => NULL),
+    ),
+  );
+}
+
+/**
+ * Only show the first image with a specific image cache.
+ */
+function theme_image_formatters_formatter_main_thumbs($element) {
+  static $images = '';
+  if ($images != '') return '';
+
+  module_load_include('inc', 'lightbox2', 'lightbox2.formatter');
+  $field = $element['#field_name'];
+
+  foreach ($element['#node']->$field as $delta => $item) {
+    // @TODO add these
+    $alt = isset($item['data']['alt']) ? $item['data']['alt'] : '';
+    $title = isset($item['data']['title']) ? $item['data']['title'] : NULL;
+
+    if ($item['fid'] != '') {
+      // add the main image
+      if ($images == '') {
+        $formatter = variable_get('image_formatters_main', 'product_default');
+        $fdata = explode('__', $formatter);
+        if ($fdata[1] == 'lightbox2') {
+          $images = lightbox2_imagefield_image_imagecache($field, $item, $formatter, $element['#node'], $fdata[2], $fdata[3], $args = array());
+        }
+        else {
+          $fdata = explode('_', $formatter);
+          $images =  theme('imagecache', $fdata[0], $item['filepath'], $alt, $title);
+        }
+      }
+
+      // add thumbnails if > 1 images
+      if (intval(sizeof($element['#node']->$field) > 1)) {
+        $formatter = variable_get('image_formatters_thumbnails', 'product_default');
+        $fdata = explode('__', $formatter);
+        $images .= lightbox2_imagefield_image_imagecache($field, $item, $formatter, $element['#node'], $fdata[2], $fdata[3], $args = array());
+      }
+    }
+  }
+
+  return $images;
+}
+
+/**
+ * Only show the first image with a specific image cache.
+ */
+function theme_image_formatters_formatter_single_image($element) {
+  static $nids;
+  if (in_array($element['#node']->nid, (array) $nids)) {
+    return '';
+  }
+  else {
+    $nids[] = $element['#node']->nid;
+  }
+
+  module_load_include('inc', 'lightbox2', 'lightbox2.formatter');
+  $field = $element['#field_name'];
+
+  foreach ($element['#node']->$field as $delta => $item) {
+    // @TODO add these
+    $alt = isset($item['data']['alt']) ? $item['data']['alt'] : '';
+    $title = isset($item['data']['title']) ? $item['data']['title'] : NULL;
+
+    if ($item['fid'] != '') {
+      // Add the main image
+      if ($image == '') {
+        $formatter = variable_get('image_formatters_single_image', 'product_default');
+        $fdata = explode('__', $formatter);
+        if ($fdata[1] == 'lightbox2') {
+          $image = lightbox2_imagefield_image_imagecache($field, $item, $formatter, $element['#node'], $fdata[2], $fdata[3], $args = array());
+        }
+        else {
+          $fdata = explode('_', $formatter);
+          $fdata = 'product_search_results';
+          $image =  theme('imagecache', $fdata, $item['filepath'], $alt, $title);
+//          $image =  theme('imagecache', $fdata[0], $item['filepath'], $alt, $title);
+        }
+      }
+
+      // Return on first pass.
+      if ($image) {
+        return $image;
+      }
+    }
+  }
+
+}
+

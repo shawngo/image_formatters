@@ -1,0 +1,5 @@
+; $Id$
+name = "Custom image formatters for imagecache"
+description = "Adds custom formatters for imagecache"
+core = 6.x
+package = Custom
