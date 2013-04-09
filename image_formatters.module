@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function image_formatters_menu() {
   $items = array();
@@ -24,8 +24,8 @@ function image_formatters_menu() {
 }
 
 /**
-* Implementation of CCK's hook_field_formatter_info().
-*/
+ * Implements hook_field_formatter_info().
+ */
 function image_formatters_field_formatter_info() {
   $formatters = array(
     'main_thumbs' => array(
@@ -43,7 +43,7 @@ function image_formatters_field_formatter_info() {
 }
 
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function image_formatters_theme() {
   return array(
@@ -72,7 +72,7 @@ function theme_image_formatters_formatter_main_thumbs($element) {
     $title = isset($item['data']['title']) ? $item['data']['title'] : NULL;
 
     if ($item['fid'] != '') {
-      // add the main image
+      // Add the main image.
       if ($images == '') {
         $formatter = variable_get('image_formatters_main', 'product_default');
         $fdata = explode('__', $formatter);
@@ -81,11 +81,11 @@ function theme_image_formatters_formatter_main_thumbs($element) {
         }
         else {
           $fdata = explode('_', $formatter);
-          $images =  theme('imagecache', $fdata[0], $item['filepath'], $alt, $title);
+          $images = theme('imagecache', $fdata[0], $item['filepath'], $alt, $title);
         }
       }
 
-      // add thumbnails if > 1 images
+      // Add thumbnails if more than one images.
       if (intval(sizeof($element['#node']->$field) > 1)) {
         $formatter = variable_get('image_formatters_thumbnails', 'product_default');
         $fdata = explode('__', $formatter);
@@ -129,7 +129,6 @@ function theme_image_formatters_formatter_single_image($element) {
           $fdata = explode('_', $formatter);
           $fdata = 'product_search_results';
           $image =  theme('imagecache', $fdata, $item['filepath'], $alt, $title);
-//          $image =  theme('imagecache', $fdata[0], $item['filepath'], $alt, $title);
         }
       }
 
@@ -139,6 +138,4 @@ function theme_image_formatters_formatter_single_image($element) {
       }
     }
   }
-
 }
-
