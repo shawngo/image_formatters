@@ -1,5 +1,4 @@
 <?php
-// $Id:$
 
 /**
  * @file
@@ -18,7 +17,6 @@ function image_formatters_admin_settings_form(&$form_state) {
 
   $f = _content_field_types();
   $formatters = $f['filefield']['formatters'];
-//  dpm($formatters);
   $options = array();
   foreach ($formatters as $key => $data) {
     $options[$key] = $data['label'];
